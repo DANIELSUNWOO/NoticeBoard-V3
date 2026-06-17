@@ -1,0 +1,101 @@
+### 1. 회원 가입 (인증 불필요) → 201 기대
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "loginId": "hong",
+  "password": "password123",
+  "email": "hong@example.com"
+}
+
+### 2. 두 번째 사용자 가입 (권한 테스트용) → 201 기대
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "김철수",
+  "loginId": "kim",
+  "password": "password123",
+  "email": "kim@example.com"
+}
+
+### 3. 중복 가입 시도 (hong 다시) → 409 기대
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "홍길동2",
+  "loginId": "hong",
+  "password": "password123",
+  "email": "hong2@example.com"
+}
+
+### 4. 인증 없이 게시글 목록 → 401 기대
+GET http://localhost:8080/posts
+
+### 5. 게시글 작성 (hong) → 201 기대
+POST http://localhost:8080/posts
+Content-Type: application/json
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+{ "title": "hong의 글", "content": "내용입니다" }
+
+
+### 5. 게시글 작성 (kim) → 201 기대
+POST http://localhost:8080/posts
+Content-Type: application/json
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+{ "title": "kim의 글", "content": "내용입니다" }
+
+### 6. 게시글 목록 (hong) → 200 기대 (콘솔의 N+1 로그 확인★)
+GET http://localhost:8080/posts?page=0&size=10
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+### 7. 게시글 상세 → 200 기대
+GET http://localhost:8080/posts/1
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+### 8. kim이 hong의 글 수정 시도 → 403 기대
+PUT http://localhost:8080/posts/1
+Content-Type: application/json
+Authorization: Basic a2ltOnBhc3N3b3JkMTIz
+
+{
+  "title": "무단 수정",
+  "content": "남의 글 수정 시도"
+}
+
+### 9. hong이 자기 글 수정 → 200 기대
+PUT http://localhost:8080/posts/1
+Content-Type: application/json
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+{
+  "title": "수정된 제목",
+  "content": "수정된 내용"
+}
+
+### 10. 댓글 작성 → 201 기대
+POST http://localhost:8080/comments
+Content-Type: application/json
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+{
+  "content": "좋은 글이네요!",
+  "postId": 1
+}
+
+### 11. 댓글 목록 → 200 기대
+GET http://localhost:8080/comments?postId=1
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+### 12. 댓글 소프트 삭제 → 204 기대
+DELETE http://localhost:8080/comments/1
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+### 13. 삭제 후 댓글 목록 (빈 배열 기대 — 소프트 삭제 확인)
+GET http://localhost:8080/comments?postId=1
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
