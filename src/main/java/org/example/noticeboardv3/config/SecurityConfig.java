@@ -1,5 +1,6 @@
 package org.example.noticeboardv3.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,16 +13,21 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor   // EntryPoint 주입 (6.22 add)
+
 public class SecurityConfig {
+
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;  // (6.22 add)
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // [결정] CSRF 비활성화 — 순수 REST API는 세션/쿠키 기반이 아니라 매 요청 인증 헤더를 쓰므로 불필요
+                // CSRF 비활성화 — 순수 REST API는 세션/쿠키 기반이 아니라 매 요청 인증 헤더를 쓰므로 불필요
                 //        (지난번 Thymeleaf 폼에서 겪은 CSRF 토큰 이슈가 여기선 안 생김)
                 .csrf(csrf -> csrf.disable())
 
-                // [결정] 세션을 만들지 않음(STATELESS) — HTTP Basic은 매 요청마다 인증하므로 서버가 상태를 안 가짐
+                // 세션을 만들지 않음(STATELESS) — HTTP Basic은 매 요청마다 인증하므로 서버가 상태를 안 가짐
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -34,7 +40,9 @@ public class SecurityConfig {
                 )
 
                 // [결정] HTTP Basic 인증 활성화
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                // 인증 실패 시 우리 EntryPoint가 처리하도록 등록 (6.22 add)
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint));
 
         return http.build();
     }

@@ -120,3 +120,6 @@ Authorization: Basic YWRtaW46YWRtaW4xMjM=
 ### 삭제 확인 — 목록 조회 (id 1이 사라졌는지)
 GET http://localhost:8080/posts?page=0&size=10
 Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
+
+### 인증 없이 게시글 목록 호출
+GET http://localhost:8080/posts
