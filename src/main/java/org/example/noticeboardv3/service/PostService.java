@@ -81,4 +81,10 @@ public class PostService {
             throw new NotOwnerException("본인의 게시글만 수정/삭제할 수 있습니다.");
         }
     }
+
+    // 제목 검색 (읽기 전용)
+    @Transactional(readOnly = true)
+    public Page<Post> searchPosts(String keyword, Pageable pageable) {
+        return postRepository.searchByTitle(keyword, pageable);
+    }
 }

@@ -68,4 +68,14 @@ public class PostController {
         Post post = postService.getPost(id);
         return ResponseEntity.ok(PostDto.Response.from(post));
     }
+
+    // 게시글 제목 검색 — GET /posts/search?keyword=...&page=0&size=10
+    @GetMapping("/search")
+    public ResponseEntity<Page<PostDto.Response>> searchPosts(
+            @RequestParam String keyword,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<Post> posts = postService.searchPosts(keyword, pageable);
+        Page<PostDto.Response> response = posts.map(PostDto.Response::from);
+        return ResponseEntity.ok(response);
+    }
 }

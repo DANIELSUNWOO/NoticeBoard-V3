@@ -99,3 +99,6 @@ Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
 GET http://localhost:8080/comments?postId=1
 Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
 
+### 게시글 제목 검색
+GET http://localhost:8080/posts/search?keyword=hong
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==

@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
 
@@ -13,4 +14,13 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query(value = "SELECT p FROM Post p JOIN FETCH p.user ORDER BY p.createdDate DESC",
             countQuery = "SELECT COUNT(p) FROM Post p")
     Page<Post> findAllWithUser(Pageable pageable);
+
+    // 제목에 keyword가 포함된 게시글 검색 (페이징 + 작성자 fetch join)
+// [결정] 검색 결과도 목록처럼 작성자를 함께 보여주므로 fetch join (N+1 방지)
+//        LIKE '%keyword%' 검색을 위해 CONCAT 사용
+    @Query(value = "SELECT p FROM Post p JOIN FETCH p.user " +
+            "WHERE p.title LIKE CONCAT('%', :keyword, '%') " +
+            "ORDER BY p.createdDate DESC",
+            countQuery = "SELECT COUNT(p) FROM Post p WHERE p.title LIKE CONCAT('%', :keyword, '%')")
+    Page<Post> searchByTitle(@Param("keyword") String keyword, Pageable pageable);
 }
