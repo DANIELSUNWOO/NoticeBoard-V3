@@ -121,5 +121,9 @@ Authorization: Basic YWRtaW46YWRtaW4xMjM=
 GET http://localhost:8080/posts?page=0&size=10
 Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
 
-### 인증 없이 게시글 목록 호출
+### 인증 없이 게시글 목록 호출 (6.21 update)
 GET http://localhost:8080/posts
+
+### hong 헤더로 → 목표 : 200 (6.21 add)
+GET http://localhost:8080/posts
+Authorization: Basic aG9uZzpwYXNzd29yZDEyMw==
