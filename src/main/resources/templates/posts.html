@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판 · NoticeBoard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+        .header-inner {
+            max-width: 800px; margin: 0 auto; padding: 0 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-size: 20px; font-weight: 700; color: var(--navy); text-decoration: none; }
+        .header-right { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .header-right .user { color: var(--text-sub); }
+        .container { max-width: 800px; margin: 0 auto; padding: 32px 20px; }
+        .page-head {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-title { font-size: 24px; font-weight: 700; }
+        .post-list { display: flex; flex-direction: column; gap: 12px; }
+        .post-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px 24px;
+            text-decoration: none; color: var(--text);
+            transition: box-shadow 0.15s ease, transform 0.15s ease;
+        }
+        .post-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transform: translateY(-1px);
+        }
+        .post-card .title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+        .post-card .meta { font-size: 13px; color: var(--text-sub); display: flex; gap: 12px; }
+        .empty { text-align: center; color: var(--text-sub); padding: 60px 0; }
+        .logout-btn {
+            background: none; border: none; color: var(--text-sub);
+            font-size: 14px; cursor: pointer; font-family: inherit;
+        }
+        .logout-btn:hover { color: var(--danger); }
+    </style>
+</head>
+<body>
+<!-- 상단 헤더 -->
+<div class="header">
+    <div class="header-inner">
+        <a th:href="@{/view/posts}" class="logo">JeongBank</a>
+        <div class="header-right">
+            <span class="user" th:text="${currentUser.name} + '님'">홍길동님</span>
+            <!-- 로그아웃: POST로 전송 (Security logout) -->
+            <form th:action="@{/view/logout}" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">로그아웃</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 본문 -->
+<div class="container">
+    <div class="page-head">
+        <div class="page-title">게시글</div>
+        <a th:href="@{/view/posts/new}" class="btn btn-primary">글쓰기</a>
+    </div>
+
+    <!-- 게시글 목록 -->
+    <div class="post-list">
+        <!-- posts.content를 반복하며 카드 생성 -->
+        <a th:each="post : ${posts.content}"
+           th:href="@{/view/posts/{id}(id=${post.id})}"
+           class="post-card">
+            <div class="title" th:text="${post.title}">제목</div>
+            <div class="meta">
+                <span th:text="${post.author.name}">작성자</span>
+                <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+            </div>
+        </a>
+
+        <!-- 글이 없을 때 -->
+        <div class="empty" th:if="${posts.content.isEmpty()}">
+            아직 게시글이 없습니다.
+        </div>
+    </div>
+</div>
+</body>
+</html>
