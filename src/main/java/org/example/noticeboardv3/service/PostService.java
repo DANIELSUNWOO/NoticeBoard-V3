@@ -43,11 +43,12 @@ public class PostService {
     }
 
     // 게시글 삭제 — 본인만 가능 (딸린 댓글은 cascade로 함께 삭제됨)
+    // 게시글 삭제 — 본인 또는 ADMIN만 가능( 6.21 update )
     @Transactional
     public void deletePost(Integer id, String loginId) {
         Post post = findPostById(id);
-        validateOwner(post, loginId);
-        postRepository.delete(post);  // cascade=ALL, orphanRemoval → 댓글도 물리 삭제
+        validateOwnerOrAdmin(post, loginId);   // [변경] 소유권 OR 관리자 검증
+        postRepository.delete(post);
     }
 
     // 게시글 목록 — 최신순 페이징 (읽기 전용)
@@ -75,10 +76,28 @@ public class PostService {
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다: " + loginId));
     }
 
-    // [핵심] 소유권 검증 — 게시글 작성자와 현재 로그인 사용자가 같은지
+    // 소유권 검증 — 게시글 작성자와 현재 로그인 사용자가 같은지
     private void validateOwner(Post post, String loginId) {
         if (!post.getUser().getLoginId().equals(loginId)) {
             throw new NotOwnerException("본인의 게시글만 수정/삭제할 수 있습니다.");
+        }
+    }
+
+    // 본인이거나 ADMIN이면 통과, 둘 다 아니면 403 (6.21 add)
+    private void validateOwnerOrAdmin(Post post, String loginId) {
+        // 현재 로그인 사용자 조회
+        User currentUser = findUserByLoginId(loginId);
+
+        // 본인인지 확인
+        boolean isOwner = post.getUser().getLoginId().equals(loginId);
+
+        // ADMIN 역할을 가졌는지 확인
+        boolean isAdmin = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMIN"));
+
+        // 본인도 아니고 ADMIN도 아니면 거부
+        if (!isOwner && !isAdmin) {
+            throw new NotOwnerException("본인의 게시글이거나 관리자만 삭제할 수 있습니다.");
         }
     }
 
